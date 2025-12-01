@@ -1,12 +1,14 @@
 package com.siddhant.tickets.domain.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 @Entity
@@ -28,15 +30,42 @@ public class User {
     @Column(name = "email", nullable = false)
     private String email;
 
-    //TODO: managing
+    @OneToMany(mappedBy = "organizer", cascade = CascadeType.ALL)
+    private List<Event> organizedEvents = new ArrayList<>();
 
-    //TODO: attending
+    @ManyToMany
+    @JoinTable(
+            name = "userAttendingEvents",
+            joinColumns = @JoinColumn(name = "userId"),
+            inverseJoinColumns = @JoinColumn(name = "eventId")
+    )
+    private List<Event> attendingEvents = new ArrayList<>();
 
-    //TODO: staffing
+    @ManyToMany
+    @JoinTable(
+            name = "userStaffingEvents",
+            joinColumns = @JoinColumn(name = "userId"),
+            inverseJoinColumns = @JoinColumn(name = "eventId")
+    )
+    private List<Event> staffingEvents = new ArrayList<>();
 
+    @CreatedDate
     @Column(name = "createdAt", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    @LastModifiedDate
     @Column(name = "updatedAt",nullable = false)
     private LocalDateTime updatedAt;
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return Objects.equals(id, user.id) && Objects.equals(name, user.name) && Objects.equals(email, user.email) && Objects.equals(createdAt, user.createdAt) && Objects.equals(updatedAt, user.updatedAt);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, name, email, createdAt, updatedAt);
+    }
 }
